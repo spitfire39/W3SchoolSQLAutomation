@@ -1,6 +1,7 @@
 package W3SchoolTests;
 
 import Pages.W3SchoolPage;
+import W3SchoolTests.Data.StaticProvider;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
@@ -19,50 +20,44 @@ public class W3SchoolTest {
         page.restoreDatabase();
     }
 
-    @Test
-    public void getAllRecordsFromCustomerTableAndCheckContactAddress(){
-        page.setAndSubmitSelectQuery("SELECT * FROM Customers");
-        Assert.assertTrue(page.checkForRowPresenceBySeveralAttributes("Giovanni Rovelli", "Via Ludovico il Moro 22"));
+    @Test(dataProvider = "Test_1", dataProviderClass = StaticProvider.class)
+    public void getAllRecordsFromCustomerTableAndCheckContactAddress(String query, String contactName, String address){
+        page.setAndSubmitSelectQuery(query);
+        Assert.assertTrue(page.checkForRowPresenceBySeveralAttributes(contactName, address));
     }
 
-    @Test
-    public void countRowsByCityValue(){
-        page.setAndSubmitSelectQuery("SELECT * FROM Customers WHERE City = 'London'");
-        Assert.assertEquals(page.getTableRowsCount(), 6);
-        Assert.assertEquals(page.getNumberOfRecords(), "6");
+    @Test(dataProvider = "Test_2", dataProviderClass = StaticProvider.class)
+    public void countRowsByCityValue(String query, int recordNum, String recordNumStr){
+        page.setAndSubmitSelectQuery(query);
+        Assert.assertEquals(page.getTableRowsCount(), recordNum);
+        Assert.assertEquals(page.getNumberOfRecords(), recordNumStr);
     }
 
-    @Test
-    public void addNewRecordAndCheckItsPresence(){
-        page.setAndSubmitUpdateQuery("INSERT INTO Customers (CustomerName, ContactName, Address, City, PostalCode, Country) " +
-                "VALUES ('TestCustomer', 'TestContactName', 'TestStreet', 'London', '5555', 'UK')");
-        page.setAndSubmitSelectQuery("SELECT * FROM Customers " +
-                "WHERE CustomerName = 'TestCustomer' AND ContactName = 'TestContactName'");
-        Assert.assertEquals(page.getTableRowsCount(), 1);
-        Assert.assertEquals(page.getNumberOfRecords(), "1");
+    @Test(dataProvider = "Test_3", dataProviderClass = StaticProvider.class)
+    public void addNewRecordAndCheckItsPresence(String queryInsert, String querySelect, int recordNum, String recordNumStr){
+        page.setAndSubmitUpdateQuery(queryInsert);
+        page.setAndSubmitSelectQuery(querySelect);
+        Assert.assertEquals(page.getTableRowsCount(), recordNum);
+        Assert.assertEquals(page.getNumberOfRecords(), recordNumStr);
     }
 
-    @Test
-    public void updateAllRecordFields(){
-        page.setAndSubmitSelectQuery("SELECT CustomerID FROM Customers " +
-                "WHERE CustomerName = 'Around the Horn' AND ContactName = 'Thomas Hardy'");
+    @Test(dataProvider = "Test_4", dataProviderClass = StaticProvider.class)
+    public void updateAllRecordFields(String querySelect1, String queryUpdate, String querySelect2, String key, String value, int recordNum, String recordNumStr){
+        page.setAndSubmitSelectQuery(querySelect1);
         String recordId = page.getTextValueFromFirstRecord();
-        page.setAndSubmitUpdateQuery(String.format("UPDATE Customers " +
-                "SET CustomerName = 'UpdatedCustomerName', ContactName = 'UpdatedContactName', Address = 'UpdatedAddress', City= 'London', Country = 'UK' " +
-                "WHERE CustomerID = %s", recordId));
-        page.setAndSubmitSelectQuery("SELECT * FROM Customers " +
-                "WHERE CustomerName = 'UpdatedCustomerName' AND ContactName = 'UpdatedContactName'");
-        Assert.assertTrue(page.checkForRowPresenceBySeveralAttributes("UpdatedCustomerName", "UpdatedContactName"));
-        Assert.assertEquals(page.getTableRowsCount(), 1);
-        Assert.assertEquals(page.getNumberOfRecords(), "1");
+        page.setAndSubmitUpdateQuery(String.format(queryUpdate, recordId));
+        page.setAndSubmitSelectQuery(querySelect2);
+        Assert.assertTrue(page.checkForRowPresenceBySeveralAttributes(key, value));
+        Assert.assertEquals(page.getTableRowsCount(), recordNum);
+        Assert.assertEquals(page.getNumberOfRecords(), recordNumStr);
     }
 
-    @Test
-    public void deleteRecordFromTable(){
-        page.setAndSubmitSelectQuery("SELECT * FROM Customers");
-        Assert.assertEquals(page.getTableRowsCount(), 91);
-        page.setAndSubmitUpdateQuery("DELETE FROM Customers WHERE CustomerID = 2");
-        page.setAndSubmitSelectQuery("SELECT * FROM Customers");
-        Assert.assertEquals(page.getTableRowsCount(), 90);
+    @Test(dataProvider = "Test_5", dataProviderClass = StaticProvider.class)
+    public void deleteRecordFromTable(String querySelect1, int recordNum1, String queryDelete, String querySelect2, int recordNum2){
+        page.setAndSubmitSelectQuery(querySelect1);
+        Assert.assertEquals(page.getTableRowsCount(), recordNum1);
+        page.setAndSubmitUpdateQuery(queryDelete);
+        page.setAndSubmitSelectQuery(querySelect2);
+        Assert.assertEquals(page.getTableRowsCount(), recordNum2);
     }
 }
