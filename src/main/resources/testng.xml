@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+
+<suite name="W3 Suite" verbose="1" >
+    <test name="Practice with W3School SQL editor"   >
+        <classes>
+            <class name="W3SchoolTests.W3SchoolTest">
+                <methods>
+                    <include name="getAllRecordsFromCustomerTableAndCheckContactAddress" />
+                    <include name="countRowsByCityValue" />
+                    <include name="addNewRecordAndCheckItsPresence" />
+                    <include name="updateAllRecordFields" />
+                    <include name="deleteRecordFromTable" />
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>
